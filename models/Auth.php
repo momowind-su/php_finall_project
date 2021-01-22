@@ -9,12 +9,14 @@ class Auth extends Model
     protected static $instance = NULL;
     protected static $session = NULL;
 
-     function __construct(){
-        print "hello";
+    //constructor
+    protected function __construct(){
         session_start();
-        self::$session = &$_SESSION;
+        self::$session = $_SESSION;
+                
     }
 
+    //geters
     public static function getInstance(){
         if(self::$instance == NULL)
             self::$instance = new Auth();
@@ -25,6 +27,8 @@ class Auth extends Model
         return self::$user = self::$get_user_by_email('email', $email);
     }
 
+
+    //other methods
     public static function hash_password($pass){
         return password_hash($pass, PASSWORD_ARGON2I);
     }

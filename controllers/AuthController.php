@@ -4,12 +4,15 @@ require_once("models/Auth.php");
 class AuthController{
 
     public function __construct(){
-        print "Hello";
-        $this->auth = new Auth();
+        $this->auth =  Auth::getInstance();
+        
     }
 
-    public function login_page(){
-        return  require_once("../views/login.php");
+    public function login_page()
+    {
+        
+        return  require_once("/views/login.php");
     }
+
 
 }
