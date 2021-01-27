@@ -26,12 +26,12 @@ class Model
         self::$_db      = Config::get('db');
     }
 
-    // public static function getInstance()
-    // {
-    //     if(self::$instance == NULL)
-    //         self::$instance = new Model();
-    //     return self::$instance;
-    // }
+    public static function getInstance()
+    {
+        if(self::$instance == NULL)
+            self::$instance = new Model();
+        return self::$instance;
+    }
 
     protected static function connect()
     {

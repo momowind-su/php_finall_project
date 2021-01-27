@@ -1,5 +1,6 @@
 <?php
 require_once("classes/User.php");
+require_once("UserModel.php");
 require_once("Model.php");
 
 class Auth extends Model
@@ -8,15 +9,14 @@ class Auth extends Model
     protected static $redirect_path = "/login";
     protected static $instance = NULL;
     protected static $session = NULL;
+    protected static $userModel = NULL;
 
-    //constructor
     protected function __construct(){
         session_start();
-        self::$session = $_SESSION;
-                
+        self::$session = &$_SESSION;
+        self::$userModel = UserModel::getInstance();
     }
 
-    //geters
     public static function getInstance(){
         if(self::$instance == NULL)
             self::$instance = new Auth();
@@ -24,24 +24,36 @@ class Auth extends Model
     }
 
     private function get_user($email){
-        return self::$user = self::$get_user_by_email('email', $email);
+        return self::$userModel = self::$get_user_by_email('email', $email);
     }
 
-
-    //other methods
     public static function hash_password($pass){
         return password_hash($pass, PASSWORD_ARGON2I);
     }
 
     public static function login($email, $password){
-        self::$get_user($email);
-        
-        if(self::$user->email){
-            if(password_verify($password, self::$password)){
-                self::$session['user'] = self::$user;
-                return true;
-            }
+        $user = self::$userModel::get_user_by_email($email);
+
+        if($user && password_verify($password, $user->get_password()))
+        {
+            self::$session['user'] = $user;
+            self::$session['role'] = $user->get_role();
+            return require_once("/views/posts.php");
         }
+
+        return false;
+    }
+
+    public static function register($first_name, $last_name, $password, $email)
+    {
+        $last_insert_id = self::$userModel::create($first_name, $last_name, $password, $email);
+        
+        if($last_insert_id)
+        {
+            self::$session['user'] = self::$userModel::get_user($last_insert_id);
+            return true;
+        }
+
         return false;
     }
 
@@ -51,9 +63,10 @@ class Auth extends Model
     }
 
     public static function has_permission($permission, $redirect_back = true){
-        if(!isset(self::$user) || self::$user->role != $permission){
+
+        if(!isset(self::$session['user']) || !in_array(self::$session['role'], $permission)){
             if($redirect_back){
-                header('Location: ' . $_SERVER['HTTP_REFERER']);
+                header('Location: '. $_SERVER['HTTP_REFERER']);
             }
             else{
                 header('Location: ' . self::$redirect_path);

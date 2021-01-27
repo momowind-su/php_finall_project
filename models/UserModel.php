@@ -39,7 +39,7 @@ class UserModel extends Model
         return $result;
     }
 
-    public static function get_user_by_email(int $email)
+    public static function get_user_by_email(string $email)
     {
         self::connect();
         $statement = self::$connection->prepare("SELECT * FROM users WHERE email = :email");
@@ -48,5 +48,63 @@ class UserModel extends Model
         self::disconnect();
         return $result;
     }
+
+    public static function create($first_name, $last_name, $password, $email, $role = 'user')
+    {
+        $password = password_hash($password, PASSWORD_ARGON2I);
+
+        $data = [
+            "first_name" => $first_name,
+            "last_name" => $last_name,
+            "password" => $password,
+            "email" => $email,
+            "role" => $role
+        ];
+
+        self::connect();
+        
+        $sql = "INSERT INTO users (first_name, last_name,  password, email, role) VALUES (:first_name, :last_name, :password, :email, :role)";
+        $insert_id = self::$connection->prepare($sql)->execute($data);
+        self::disconnect();
+        return $insert_id;
+    }
+
+    public static function edit_user($first_name, $last_name, $email, $role, $user_id)
+    {
+        $data = [
+            "first_name" => $first_name,
+            "last_name" => $last_name,
+            "email" => $email,
+            "role" => $role,
+            "user_id" => $user_id
+        ];
+
+        self::connect();
+        $sql = "UPDATE users SET first_name=:first_name, last_name=:last_name, email=:email, role=:role WHERE user_id=:user_id";
+        $insert_id = self::$connection->prepare($sql)->execute($data);
+        self::disconnect();
+        return $insert_id;
+    }
+
+    public static function delete_user($id)
+    {
+        self::connect();
+        
+        $sql = "DELETE FROM  users WHERE user_id=:id";
+        $insert_id = self::$connection->prepare($sql)->execute([":id"=>$id]);
+        self::disconnect();
+        return $insert_id;
+        
+    }
+
+    public static function update_password($password, $id)
+    {
+        $password = password_hash($password, PASSWORD_ARGON2I);
+
+        self::connect();
+        $sql = "UPDATE users SET password=:password WHERE user_id=:user_id";
+        $insert_id = self::$connection->prepare($sql)->execute(["password" => $password, "user_id" => $id]);
+        self::disconnect();
+        return $insert_id;
+    }
 }
-?>
