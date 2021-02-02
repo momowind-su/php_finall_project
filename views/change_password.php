@@ -1,5 +1,5 @@
-<?php require_once("parts/header.php"); ?>
-  <h1 class="text-center">Login</h1>
+<?php require_once("parts/header_dashboard.php"); ?>
+  <h1 class="text-center"><?=$title?></h1>
   <div class="row">
     <div class="col">
       <form action="/?m=user&a=update_password" method="POST">

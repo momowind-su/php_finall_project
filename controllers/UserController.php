@@ -24,13 +24,14 @@ class UserController{
         $this->auth::has_permission(['admin','user']);
 
         $title = "Users";
+        $user_role = $_SESSION['role'] ?? '';
         $users = $this->model::get_users();
         require_once("views/users.php");
     }
 
     public function show_user(){
         $this->auth::has_permission(['user', 'admin']);
-
+        $user_role = $_SESSION['role'] ?? '';
         $user_id = $_REQUEST['id'];
 
         if($user_id)
@@ -47,14 +48,14 @@ class UserController{
 
     public function create_user()
     {
-        $this->auth::has_permission(['admin','user']);
+        $this->auth::has_permission(['admin']);
         $this->message = '';
         require_once("views/create_user.php");
     }
 
     public function add_user()
     {
-        $this->auth::has_permission(['admin','user']);
+        $this->auth::has_permission(['admin']);
         $this->message = "Unable to add user";
 
         if(isset($_POST['first_name']) && $_POST['last_name'] &&
@@ -72,6 +73,7 @@ class UserController{
     public function update_page()
     {
         $this->auth::has_permission(['user','admin']);
+
         if(isset($_POST['id']) && is_numeric($_POST['id']))
         {
             $title = "Update user";
@@ -119,7 +121,9 @@ class UserController{
 
     public function change_password()
     {
-        $this->auth::has_permission(['user', 'admin']);
+        $this->auth::has_permission(['admin','user']);
+        $title = "Change password";
+
         if(isset($_POST['id']) && is_numeric($_POST['id']))
         {
             $id = $_POST['id'];
@@ -130,6 +134,7 @@ class UserController{
     public function update_password()
     {
         $this->auth::has_permission(['user', 'admin']);
+
         if(isset($_POST['id']) && isset($_POST['password']) && isset($_POST['password2']) && $_POST['password'] == $_POST['password2']){
             $this->model::update_password($_POST['password'], $_POST['id']);
         }

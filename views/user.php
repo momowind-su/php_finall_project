@@ -8,7 +8,9 @@
                     <th>Name</th>
                     <th>Second Name</th>
                     <th>Email</th>
-                    <th>Actions</th>
+                    <?php if($user_role == 'admin'): ?>
+                        <th>Actions</th>
+                    <?php endif; ?>
                 </tr>
                 <?php 
                     echo "<tr>";
@@ -16,7 +18,9 @@
                         echo "<td>".$user->get_first_name()."</td>";
                         echo "<td>".$user->get_last_name()."</td>";
                         echo "<td>".$user->get_email()."</td>";
-                        echo "<td>".$user->change_password_link()."</td>";
+                        if($user_role == 'admin'){
+                            echo "<td>".$user->change_password_link()."</td>";
+                        }
                     echo "</tr>";
                 ?>
             </table>

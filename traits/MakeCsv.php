@@ -1,5 +1,11 @@
 <?php
 trait MakeCsv{
+    /* down load given data in csv format
+    * @param string file name
+    * @param columns assoc array of titles
+    * @param data 2d array of assoc arrays
+    * return 
+    */
     public function download($filename,$columns,$data)
     {
         header('Content-Type: application/octet-stream');

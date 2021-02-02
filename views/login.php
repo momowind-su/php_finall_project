@@ -11,7 +11,8 @@
           <label for="password">Password:</label>
           <input name="password" type="password" class="form-control" id="password" required>
         </div>
-        <?php $this->do_login(); ?>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
     </div>
   </div>
 <?php require_once("parts/footer.php"); ?>

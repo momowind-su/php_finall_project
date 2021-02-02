@@ -2,7 +2,7 @@
   <h1 class="text-center">Update post</h1>
   <div class="row">
     <div class="col">
-      <p><?=$post->user_name;?>, <?=$post->get_created_at();?></p>
+      <p><?=$post->get_user_name();?>, <?=$post->get_created_at();?></p>
       <form action="/?m=post&a=do_update" method="POST">
         <input value="<?=$post->get_post_id()?>" type="text" name="post_id" hidden>
         <div class="form-group">

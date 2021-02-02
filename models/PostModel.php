@@ -1,13 +1,20 @@
 <?php
     require_once("classes/Post.php");
+    require_once("CommentModel.php");
     require_once("Model.php");
 
 
+    /* post comment
+    * singleton
+    */
     class PostModel extends Model
     {
         
         protected static $class = "Post";
 
+        /* create post model instance if needed
+        * return instance of post model
+        */
         public static function getInstance()
         {
             
@@ -17,9 +24,11 @@
             return self::$instance;
         
         }
-        
 
-        public static function print_all_posts()
+        /* get all post with post creator full name
+        * return array of post objects
+        */
+        public static function print_all_posts(): array
         {
             $sql = "SELECT p.*, CONCAT(u.first_name, ' ', u.last_name) AS user_name ".
                     "FROM posts AS p ".
@@ -37,13 +46,15 @@
             return $resultArray;
         }
 
-
-        public static function get_all_posts()
+        /* get all posts as array of assoc arrays
+        * return array of assoc arrays
+        */
+        public static function get_all_posts(): array
         {
             $sql = "SELECT p.*, CONCAT(u.first_name, ' ', u.last_name) AS user_name ".
                     "FROM posts AS p ".
                     "LEFT JOIN users AS u ON u.user_id=p.user_id";
-                    
+
             self::connect();
             $result = self::$connection->query($sql);
             $resultArray = $result->fetchAll();
@@ -51,21 +62,34 @@
             return $resultArray;
         }
 
-        public static function print_post($id)
+        /* find one post by post id with its comments
+        * @param int post id
+        * return array contains post and comment
+        */
+        public static function print_post(int $id): array
         {
             self::connect();
             $sql = "SELECT p.*, CONCAT(u.first_name, ' ', u.last_name) AS user_name ".
-                    "FROM posts AS p ".
-                    "LEFT JOIN users AS u ON u.user_id=p.user_id ".
-                    "WHERE post_id = :id";
+                "FROM posts AS p ".
+                "LEFT JOIN users AS u ON u.user_id=p.user_id ".
+                "WHERE post_id=:id";
+
             $statement = self::$connection->prepare($sql);
             $statement->execute([':id'=>$id]);
-            $result = $statement->fetchObject(self::$class);
+            $post = $statement->fetchObject(self::$class);
             self::disconnect();
-            return $result;
+
+            $comments = CommentModel::getCommentsByPostId($id);
+            return ["post" => $post, "comments" => $comments];
         }
 
-        public static function edit_post($title, $text, $post_id)
+        /* post update by post id
+        * @param string title
+        * @param string text
+        * @param int post_id
+        * return number of affected rows
+        */
+        public static function edit_post(string $title, string $text, int $post_id): int
         {
             $data = [
                 "title" => $title,
@@ -75,13 +99,17 @@
     
             self::connect();
             $sql = "UPDATE posts SET title=:title, text=:text WHERE post_id=:post_id";
-            $insert_id = self::$connection->prepare($sql)->execute($data);
+            $affected_rows = self::$connection->prepare($sql)->execute($data);
             self::disconnect();
-            return $insert_id;
+            return $affected_rows;
         }
 
-        // $this->model::create_post($_POST['title'], $_POST['text']);
-        public static function create_post($title, $text)
+        /* create post with given params
+        * @param string title
+        * @param string text
+        * return number of affected rows
+        */
+        public static function create_post(string $title, string $text): int
         {
             if(isset($_SESSION['user']))
             {
@@ -94,21 +122,23 @@
                 self::connect();
                 
                 $sql = "INSERT INTO posts (title, text, user_id) VALUES (:title, :text, :user_id)";
-                $insert_id = self::$connection->prepare($sql)->execute($data);
+                $affected_rows = self::$connection->prepare($sql)->execute($data);
                 self::disconnect();
-                return $insert_id;
+                return $affected_rows;
             }
         }
 
-        public static function delete_post($post_id)
+        /* delete post by post id (all comments will also deleted)
+        * @param int post id
+        * return number of affected rows
+        */
+        public static function delete_post(int $post_id): int
         {
             self::connect();
-            $sql = "DELETE FROM  posts WHERE post_id=:post_id";
-            $insert_id = self::$connection->prepare($sql)->execute([":post_id"=>$post_id]);
+            $sql = "DELETE FROM posts WHERE post_id=:post_id";
+            $affected_rows = self::$connection->prepare($sql)->execute([":post_id"=>$post_id]);
             self::disconnect();
-            return $insert_id;
+            return $affected_rows;
         }
-
-
     }
 ?>

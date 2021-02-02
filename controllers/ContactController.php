@@ -2,6 +2,11 @@
 require_once("models/Auth.php");
 require_once("models/ContactModel.php");
 
+/*
+* class contains demo code
+* need to develope this feature later
+*/
+
 class ContactController{
 
     public function __construct(){

@@ -1,6 +1,10 @@
 <?php
 require_once("Config.php");
 
+/* db connection class
+*  performs connection to database
+*  singleton
+*/
 class Model
 {
     protected static $_db;
@@ -17,6 +21,9 @@ class Model
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ];
 
+    /* 
+    * initiate object with values from .env
+    */
     protected function __construct()
     {
         self::$_charset = Config::get('charset');
@@ -26,6 +33,9 @@ class Model
         self::$_db      = Config::get('db');
     }
 
+    /* get get instance of model class, create instance if needed
+    * return instance of model class
+    */
     public static function getInstance()
     {
         if(self::$instance == NULL)
@@ -33,18 +43,35 @@ class Model
         return self::$instance;
     }
 
-    protected static function connect()
+    /* creates connection to db
+    * return pdo connection object
+    */
+    protected static function connect(): void
     {
+        self::$_charset = Config::get('charset');
+        self::$_host    = Config::get('host');
+        self::$_user    = Config::get('user');
+        self::$_pass    = Config::get('password');
+        self::$_db      = Config::get('db');
+        
         $_dns = "mysql:host=".self::$_host.";dbname=".self::$_db.";charset=".self::$_charset;
         self::$connection = new PDO($_dns, self::$_user, self::$_pass, self::$_opt);
     }
 
-    public static function disconnect()
+    /* disconect from db
+    * return void
+    */
+    public static function disconnect():void
     {
         self::$connection = null;
     }
 
-    protected static function select($sql)
+    /* get data from db by given query
+    * not secure, better use prepered queries
+    * @param string sql query
+    * return arrau of ogjects
+    */
+    protected static function select($sql): array
     {
         self::connect();
         $resultArray = array();

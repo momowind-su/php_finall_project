@@ -2,10 +2,16 @@
 require_once("classes/User.php");
 require_once("Model.php");
 
+/* user model class
+*  singleton
+*/
 class UserModel extends Model
 {
     protected static $class = "User";
 
+    /* 
+    *  creates instance of user model if needed
+    */
     public static function getInstance()
     {
         if(self::$instance == NULL)
@@ -13,9 +19,12 @@ class UserModel extends Model
         return self::$instance;
     }
 
-    public static function get_users()
+    /* get array of all users
+    * return array of user class
+    */
+    public static function get_users(): array
     {
-        $sql = ("SELECT * FROM users");
+        $sql = "SELECT * FROM users";
         self::connect();
         $resultArray = array();
         $result = self::$connection->query($sql);
@@ -29,27 +38,43 @@ class UserModel extends Model
         return $resultArray;
     }
 
-    public static function get_user(int $id)
+    /* find user by given user id
+    * @param int user id
+    * return user object
+    */
+    public static function get_user(int $id): ?User
     {
         self::connect();
         $statement = self::$connection->prepare("SELECT * FROM users WHERE user_id = :id");
         $statement->execute([':id'=>$id]);
         $result = $statement->fetchObject(self::$class);
         self::disconnect();
-        return $result;
+        return $result ? $result : null;
     }
 
-    public static function get_user_by_email(string $email)
+    /* find user by user id
+    * @param string user email
+    * return user object
+    */
+    public static function get_user_by_email(string $email): ?User
     {
         self::connect();
         $statement = self::$connection->prepare("SELECT * FROM users WHERE email = :email");
         $statement->execute([':email'=>$email]);
         $result = $statement->fetchObject(self::$class);
         self::disconnect();
-        return $result;
+        return $result ? $result : null;
     }
 
-    public static function create($first_name, $last_name, $password, $email, $role = 'user')
+    /* creates user with given params
+    * @param string first name
+    * @param string last name
+    * @param string password
+    * @param string email
+    * @param string role
+    * return void
+    */
+    public static function create(string $first_name, string $last_name, string $password, string $email, string $role = 'user')
     {
         $password = password_hash($password, PASSWORD_ARGON2I);
 
@@ -64,12 +89,28 @@ class UserModel extends Model
         self::connect();
         
         $sql = "INSERT INTO users (first_name, last_name,  password, email, role) VALUES (:first_name, :last_name, :password, :email, :role)";
-        $insert_id = self::$connection->prepare($sql)->execute($data);
-        self::disconnect();
-        return $insert_id;
+
+        try{
+            $insert_id = self::$connection->prepare($sql)->execute($data);
+            return $insert_id;
+        }
+        catch(Exception $e){
+            return false;
+        }
+        finally{
+            self::disconnect();
+        }
     }
 
-    public static function edit_user($first_name, $last_name, $email, $role, $user_id)
+    /* update user with given data
+    * @param string first name
+    * @param string last name
+    * @param string password
+    * @param string email
+    * @param string role
+    * return number of affected rows
+    */
+    public static function edit_user(string $first_name, string $last_name, string $email, string $role, int $user_id): int
     {
         $data = [
             "first_name" => $first_name,
@@ -81,23 +122,32 @@ class UserModel extends Model
 
         self::connect();
         $sql = "UPDATE users SET first_name=:first_name, last_name=:last_name, email=:email, role=:role WHERE user_id=:user_id";
-        $insert_id = self::$connection->prepare($sql)->execute($data);
+        $affected_rows = self::$connection->prepare($sql)->execute($data);
         self::disconnect();
-        return $insert_id;
+        return $affected_rows;
     }
 
-    public static function delete_user($id)
+    /* delete user by user id
+    * @param int user id
+    * return number of affected rows
+    */
+    public static function delete_user(int $id): int
     {
         self::connect();
         
         $sql = "DELETE FROM  users WHERE user_id=:id";
-        $insert_id = self::$connection->prepare($sql)->execute([":id"=>$id]);
+        $affected_rows = self::$connection->prepare($sql)->execute([":id"=>$id]);
         self::disconnect();
-        return $insert_id;
+        return $affected_rows;
         
     }
 
-    public static function update_password($password, $id)
+    /* update user password
+    * @param string password
+    * @param int user id
+    * return number of affected rows
+    */
+    public static function update_password(string $password, int $id): int
     {
         $password = password_hash($password, PASSWORD_ARGON2I);
 

@@ -8,6 +8,7 @@ require_once("controllers/AuthController.php");
 require_once("controllers/UserController.php");
 require_once("controllers/ContactController.php");
 require_once("controllers/PostController.php");
+require_once("controllers/CommentController.php");
 
 define("CONTROLLERS_PATH", "controllers");
 define("CONTROLLER_SUFFICS", "Controller");
@@ -22,9 +23,9 @@ if(isset($_GET['m']) && isset($_GET['a']))
         die();
     }
     $class = new $className;
-    call_user_func([$class, $_GET['a']], $_REQUEST);
+    call_user_func([$class, $_GET['a']]);
 }
 else{
-    header("Location: ?m=auth&a=login_page");
+    header("Location: /?m=user&a=show_users");
 }
 

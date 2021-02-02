@@ -3,3 +3,7 @@
 body{
     background-color: azure;
 }
+
+.posts-comments{
+    display: none;
+}

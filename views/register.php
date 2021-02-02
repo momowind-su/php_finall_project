@@ -13,7 +13,7 @@
         </div>
         <div class="form-group">
           <label for="email">Email address:</label>
-          <input type="text" name="email" class="form-control" id="email" required>
+          <input type="email" name="email" class="form-control" id="email" required>
         </div>
         <div class="form-group">
           <label for="pwd">Password:</label>

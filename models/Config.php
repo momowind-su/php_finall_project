@@ -1,13 +1,21 @@
 <?php
 define("ENV_PATH", ".env");
 
+
+/*
+* read .env / find configuration
+*/
 class Config{
     private static $file;
     private static $result_array = [];
     private static $line_delimiter = "=";
     private static $comment_delimiter = "#";
-    
-    private static function parse_file()
+
+
+    /* read all .env into array
+    * return void
+    */
+    private static function parse_file(): void
     {
         while(!feof(self::$file))
         {
@@ -20,7 +28,11 @@ class Config{
         fclose(self::$file);
     }
 
-    public static function get($config)
+    /* get needed config from .env by his name
+    * @param congig name
+    * return cofig value othervise false
+    */
+    public static function get(string $config): string
     {
         if(is_file(ENV_PATH))
         {
@@ -34,7 +46,11 @@ class Config{
         }
     }
 
-    public static function get_many($configs)
+    /* find many configs by given array
+    * @param array of strings names of configs
+    * return assoc array of configs
+    */
+    public static function get_many(array $configs): array
     {
         if(is_file(ENV_PATH))
         {
